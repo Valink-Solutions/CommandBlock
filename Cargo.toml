@@ -1,12 +1,13 @@
 [package]
 name = "commandblock"
 version = "0.1.0"
+authors = ["Jake 'PIXL' Evans", "Valink Solutions"]
 edition = "2021"
 
 description = "A library providing utilities for working with Minecraft data."
 repository = "https://github.com/Valink-Solutions/CommandBlock"
 readme = "README.md"
-license = "GNU General Public License v3.0"
+license = "GPL-3.0-only"
 
 keywords = ["minecraft", "nbt", "bedrock", "java", "data"]
 categories = ["data-structures", "parsing", "utilities"]
