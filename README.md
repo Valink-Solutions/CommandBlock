@@ -2,6 +2,9 @@
 
 CommandBlock is a Rust-based library designed to handle various Minecraft-related data formats, including NBT (Named Binary Tag) data, Anvil data, and region files. This library is a work in progress and is currently not recommended for production use. It is made public for the purpose of contribution and collaboration.
 
+> **Warning**
+> This library is a work in progress and is not recommended for use in production environments. Currently it is only public for educational and contribution purposes only.
+
 ## Purpose
 
 The primary aim of CommandBlock is to provide a versatile Rust-based solution for handling Minecraft data commonly found in formats like NBT, Anvil, and region files. The library is being developed to assist projects like [ChunkVault](https://chunkvault.com), where efficient parsing and manipulation of Minecraft world data is essential.
@@ -31,12 +34,8 @@ Please note that all contributions are subject to review, and the repository own
 
 ## License
 
-This project is under [GNU General Public License v3.0](LICENSE.txt), which allows you to use, modify, and distribute the code. However, please note that the library is not production-ready, so use at your own discretion.
+This project is under [GNU General Public License v3.0](LICENSE.txt).
 
 ## Contact
 
 If you have any questions or suggestions, feel free to [open an issue](https://github.com/Valink-Solutions/CommandBlock/issues) on GitHub.
-
----
-
-**Disclaimer:** This library is a work in progress and is not recommended for use in production environments. It is intended for educational and contribution purposes only.
