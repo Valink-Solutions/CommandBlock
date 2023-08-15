@@ -1,0 +1,39 @@
+name: Run Tests
+
+on:
+  push:
+    paths-ignore:
+      - "**/**.md"
+      - "**/**.txt"
+      - "**/**.dat"
+      - "**/**.mca"
+  pull_request:
+    paths-ignore:
+      - "**/**.md"
+      - "**/**.txt"
+      - "**/**.dat"
+      - "**/**.mca"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        edition: [bedrock_edition, java_edition]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Run Tests
+      run: |
+        if [[ "${{ matrix.edition }}" == "bedrock_edition" ]]; then
+          cargo test --no-default-features --features ${{ matrix.edition }}
+        else
+          cargo test --features ${{ matrix.edition }}
+        fi

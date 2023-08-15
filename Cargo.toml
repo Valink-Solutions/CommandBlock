@@ -1,0 +1,20 @@
+[package]
+name = "commandblock"
+version = "0.1.0"
+edition = "2021"
+
+description = "A library providing utilities for working with Minecraft data."
+repository = "https://github.com/Valink-Solutions/CommandBlock"
+readme = "README.md"
+
+[features]
+default = ["java_edition"]
+serde = []
+java_edition = []
+bedrock_edition = []
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+byteorder = "1.4.3"
+flate2 = "1.0.26"
