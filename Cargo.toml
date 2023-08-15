@@ -8,8 +8,8 @@ repository = "https://github.com/Valink-Solutions/CommandBlock"
 readme = "README.md"
 license = "GNU General Public License v3.0"
 
-keywords = ["minecraft", "nbt", "mc", "bedrock", "java", "anvil", "region", "data"]
-categories = ["data-structures", "parsing", "serialization", "utilities"]
+keywords = ["minecraft", "nbt", "bedrock", "java", "data"]
+categories = ["data-structures", "parsing", "utilities"]
 
 [features]
 default = ["java_edition"]
