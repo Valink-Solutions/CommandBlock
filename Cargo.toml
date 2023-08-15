@@ -6,6 +6,10 @@ edition = "2021"
 description = "A library providing utilities for working with Minecraft data."
 repository = "https://github.com/Valink-Solutions/CommandBlock"
 readme = "README.md"
+license = "GNU General Public License v3.0"
+
+keywords = ["minecraft", "nbt", "mc", "bedrock", "java", "anvil", "region", "data"]
+categories = ["data-structures", "parsing", "serialization", "utilities"]
 
 [features]
 default = ["java_edition"]
