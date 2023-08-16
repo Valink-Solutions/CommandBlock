@@ -1,6 +1,6 @@
 [package]
 name = "commandblock"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Jake 'PIXL' Evans", "Valink Solutions"]
 edition = "2021"
 
@@ -13,10 +13,7 @@ keywords = ["minecraft", "nbt", "bedrock", "java", "data"]
 categories = ["data-structures", "parsing", "utilities"]
 
 [features]
-default = ["java_edition"]
 serde = []
-java_edition = []
-bedrock_edition = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

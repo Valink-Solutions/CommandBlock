@@ -81,3 +81,9 @@ impl From<std::io::Error> for NbtError {
         NbtError::IoError(e)
     }
 }
+
+#[derive(Debug, PartialEq)]
+pub enum Endian {
+    Big,
+    Little,
+}
