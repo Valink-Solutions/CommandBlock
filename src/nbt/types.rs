@@ -1,6 +1,12 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Display},
+};
 
-#[derive(Debug, PartialEq)]
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeMap, Serialize};
+
+#[derive(PartialEq, Clone)]
 pub enum NbtValue {
     End,
     Byte(i8),
@@ -15,6 +21,76 @@ pub enum NbtValue {
     Compound(HashMap<String, NbtValue>),
     IntArray(Vec<i32>),
     LongArray(Vec<i64>),
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for NbtValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match *self {
+            NbtValue::End => serializer.serialize_unit(),
+            NbtValue::Byte(b) => serializer.serialize_i8(b),
+            NbtValue::Short(s) => serializer.serialize_i16(s),
+            NbtValue::Int(i) => serializer.serialize_i32(i),
+            NbtValue::Long(l) => serializer.serialize_i64(l),
+            NbtValue::Float(f) => serializer.serialize_f32(f),
+            NbtValue::Double(d) => serializer.serialize_f64(d),
+            NbtValue::ByteArray(ref vec) => serializer.collect_seq(vec),
+            NbtValue::String(ref s) => serializer.serialize_str(s),
+            NbtValue::List(ref vec) => serializer.collect_seq(vec),
+            NbtValue::Compound(ref map) => {
+                let mut map_serializer = serializer.serialize_map(Some(map.len()))?;
+                for (k, v) in map {
+                    map_serializer.serialize_entry(k, v)?;
+                }
+                map_serializer.end()
+            }
+            NbtValue::IntArray(ref vec) => serializer.collect_seq(vec),
+            NbtValue::LongArray(ref vec) => serializer.collect_seq(vec),
+        }
+    }
+}
+
+impl Display for NbtValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NbtValue::End => write!(f, "End"),
+            NbtValue::Byte(v) => write!(f, "{}b", v),
+            NbtValue::Short(v) => write!(f, "{}s", v),
+            NbtValue::Int(v) => write!(f, "{}", v),
+            NbtValue::Long(v) => write!(f, "{}l", v),
+            NbtValue::Float(v) => write!(f, "{}f", v),
+            NbtValue::Double(v) => write!(f, "{}d", v),
+            NbtValue::ByteArray(v) => write!(f, "{:?}", v),
+            NbtValue::String(v) => write!(f, "{}", v),
+            NbtValue::List(v) => write!(f, "{:?}", v),
+            NbtValue::Compound(v) => write!(f, "{:?}", v),
+            NbtValue::IntArray(v) => write!(f, "{:?}", v),
+            NbtValue::LongArray(v) => write!(f, "{:?}", v),
+        }
+    }
+}
+
+impl Debug for NbtValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NbtValue::End => write!(f, "End"),
+            NbtValue::Byte(v) => write!(f, "{}b", v),
+            NbtValue::Short(v) => write!(f, "{}s", v),
+            NbtValue::Int(v) => write!(f, "{}", v),
+            NbtValue::Long(v) => write!(f, "{}l", v),
+            NbtValue::Float(v) => write!(f, "{}f", v),
+            NbtValue::Double(v) => write!(f, "{}d", v),
+            NbtValue::ByteArray(v) => write!(f, "{:?}", v),
+            NbtValue::String(v) => write!(f, "{}", v),
+            NbtValue::List(v) => write!(f, "{:?}", v),
+            NbtValue::Compound(v) => write!(f, "{:?}", v),
+            NbtValue::IntArray(v) => write!(f, "{:?}", v),
+            NbtValue::LongArray(v) => write!(f, "{:?}", v),
+        }
+    }
 }
 
 impl NbtValue {
@@ -53,6 +129,10 @@ impl NbtValue {
             NbtValue::IntArray(_) => 0xB,
             NbtValue::LongArray(_) => 0xC,
         }
+    }
+
+    pub fn to_snbt(&self) -> String {
+        format!("{:?}", self)
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "commandblock"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Jake 'PIXL' Evans", "Valink Solutions"]
 edition = "2021"
 
@@ -13,10 +13,11 @@ keywords = ["minecraft", "nbt", "bedrock", "java", "data"]
 categories = ["data-structures", "parsing", "utilities"]
 
 [features]
-serde = []
+serde = ["dep:serde"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 byteorder = "1.4.3"
 flate2 = "1.0.26"
+serde = { version = "1.0.183", features = ["derive"], optional = true }
