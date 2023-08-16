@@ -1,6 +1,3 @@
-mod reader;
-mod types;
-mod writer;
+mod nbt;
 
-pub use self::reader::*;
-pub use self::types::*;
+pub use nbt::*;

@@ -2,10 +2,7 @@ use std::{collections::HashMap, fs::File, io::Read, path::PathBuf};
 
 use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
-use crate::{
-    types::{Compression, NbtError, NbtValue},
-    Endian,
-};
+use crate::nbt::types::{Compression, Endian, NbtError, NbtValue};
 
 use flate2::read::{GzDecoder, ZlibDecoder};
 
