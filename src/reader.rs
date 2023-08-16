@@ -96,7 +96,6 @@ impl<R: Read> NbtReader<R> {
             }
             0x0B => {
                 let array_length = self.parse_int()? as usize;
-                let array_length = array_length as usize;
                 let mut array = Vec::with_capacity(array_length);
                 for _ in 0..array_length {
                     let value = self.parse_int()?;
@@ -113,7 +112,7 @@ impl<R: Read> NbtReader<R> {
                 }
                 Ok(NbtValue::LongArray(array))
             }
-            _ => return Err(NbtError::InvalidTagType(tag_type)),
+            _ => Err(NbtError::InvalidTagType(tag_type)),
         }
     }
 

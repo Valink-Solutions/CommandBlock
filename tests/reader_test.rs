@@ -147,7 +147,7 @@ fn test_parse_nbt_value_string() {
 #[test]
 fn test_parse_nbt_value_list() {
     let java_data = [
-        0x01, // list tag type
+        0x01, // lists tag type
         0x00, 0x00, 0x00, 0x02, // array length
         0x7F, 0x7F, // array values
     ];
@@ -156,7 +156,7 @@ fn test_parse_nbt_value_list() {
         .unwrap();
 
     let bedrock_data = [
-        0x01, // list tag type
+        0x01, // lists tag type
         0x02, 0x00, 0x00, 0x00, // array length
         0x7F, 0x7F, // array values
     ];
@@ -172,6 +172,89 @@ fn test_parse_nbt_value_list() {
         bedrock_result,
         NbtValue::List(vec![NbtValue::Byte(127), NbtValue::Byte(127)])
     );
+}
+
+#[test]
+fn test_parse_nbt_value_compound() {
+    let java_data = [
+        0x01, // tag type
+        0x00, 0x02, // key length
+        0x41, 0x42, // key value
+        0x7F, // value
+        0x00, // end tag
+    ];
+    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+        .parse_nbt_value(0x0A)
+        .unwrap();
+
+    let bedrock_data = [
+        0x01, // tag type
+        0x02, 0x00, // key length
+        0x41, 0x42, // key value
+        0x7F, // value
+        0x00, // end tag
+    ];
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+        .parse_nbt_value(0x0A)
+        .unwrap();
+
+    let mut map = std::collections::HashMap::new();
+    map.insert("AB".to_string(), NbtValue::Byte(127));
+
+    assert_eq!(java_result, NbtValue::Compound(map));
+
+    let mut map = std::collections::HashMap::new();
+    map.insert("AB".to_string(), NbtValue::Byte(127));
+
+    assert_eq!(bedrock_result, NbtValue::Compound(map));
+}
+
+#[test]
+fn test_parse_nbt_value_int_array() {
+    let java_data = [
+        0x00, 0x00, 0x00, 0x02, // array length
+        0x00, 0x00, 0x00, 0x01, // array values
+        0x00, 0x00, 0x00, 0x02, // array values
+    ];
+    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+        .parse_nbt_value(0x0B)
+        .unwrap();
+
+    let bedrock_data = [
+        0x02, 0x00, 0x00, 0x00, // array length
+        0x01, 0x00, 0x00, 0x00, // array values
+        0x02, 0x00, 0x00, 0x00, // array values
+    ];
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+        .parse_nbt_value(0x0B)
+        .unwrap();
+
+    assert_eq!(java_result, NbtValue::IntArray(vec![1, 2]));
+    assert_eq!(bedrock_result, NbtValue::IntArray(vec![1, 2]));
+}
+
+#[test]
+fn test_parse_nbt_value_long_array() {
+    let java_data = [
+        0x00, 0x00, 0x00, 0x02, // array length
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // array values
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ];
+    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+        .parse_nbt_value(0x0C)
+        .unwrap();
+
+    let bedrock_data = [
+        0x02, 0x00, 0x00, 0x00, // array length
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // array values
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ];
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+        .parse_nbt_value(0x0C)
+        .unwrap();
+
+    assert_eq!(java_result, NbtValue::LongArray(vec![0, 1]));
+    assert_eq!(bedrock_result, NbtValue::LongArray(vec![0, 1]));
 }
 
 #[test]
