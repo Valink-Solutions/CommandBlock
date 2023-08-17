@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
-    fmt::{Debug, Display},
+    error::Error,
+    fmt::{Debug, Display, Formatter},
 };
 
 #[cfg(feature = "serde")]
@@ -159,6 +160,46 @@ pub enum NbtError {
 impl From<std::io::Error> for NbtError {
     fn from(e: std::io::Error) -> NbtError {
         NbtError::IoError(e)
+    }
+}
+
+impl Display for NbtError {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        match *self {
+            NbtError::IoError(ref err) => write!(f, "IO error: {}", err),
+            NbtError::InvalidTagType(ref tag) => write!(f, "Invalid tag type: {}", tag),
+            NbtError::InvalidCompression(ref compression) => {
+                write!(f, "Invalid compression type: {}", compression)
+            }
+            NbtError::InvalidString(ref err) => write!(f, "Invalid string: {}", err),
+            NbtError::InvalidListType(ref tag) => write!(f, "Invalid list type: {}", tag),
+            NbtError::InvalidCompoundType(ref tag) => write!(f, "Invalid compound type: {}", tag),
+            NbtError::InvalidByteArrayLength(ref len) => {
+                write!(f, "Invalid byte array length: {}", len)
+            }
+            NbtError::InvalidIntArrayLength(ref len) => {
+                write!(f, "Invalid int array length: {}", len)
+            }
+            NbtError::InvalidLongArrayLength(ref len) => {
+                write!(f, "Invalid long array length: {}", len)
+            }
+        }
+    }
+}
+
+impl Error for NbtError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match *self {
+            NbtError::IoError(ref err) => Some(err),
+            NbtError::InvalidTagType(_) => None,
+            NbtError::InvalidCompression(_) => None,
+            NbtError::InvalidString(ref err) => Some(err),
+            NbtError::InvalidListType(_) => None,
+            NbtError::InvalidCompoundType(_) => None,
+            NbtError::InvalidByteArrayLength(_) => None,
+            NbtError::InvalidIntArrayLength(_) => None,
+            NbtError::InvalidLongArrayLength(_) => None,
+        }
     }
 }
 

@@ -11,10 +11,21 @@ The primary aim of CommandBlock is to provide a versatile Rust-based solution fo
 
 ## Features (Planned)
 
-- NBT Data Handling: Parse, manipulate, and serialize Minecraft NBT data structures.
-- Anvil Data Parsing: Read and interpret Anvil world data format used in Minecraft.
-- Region File Support: Work with Minecraft region files efficiently.
-- Utility Functions: Provide convenient functions for common Minecraft data operations.
+- NBT Data Handling
+    - [x] Parse NBT data structures
+    - [x] NBT to Serde compatible structures
+    - [ ] Manipulate NBT data structures
+    - [ ] Write NBT data structures
+- Anvil Data Handling
+    - [ ] Parse Anvil data structures
+    - [ ] Interpret Anvil data structures
+    - [ ] Manipulate Anvil data structures
+    - [ ] Write Anvil data structures
+- Region File Support
+    - [ ] Read Minecraft region files
+    - [ ] Interpret Minecraft region files
+    - [ ] Manipulate Minecraft region files
+    - [ ] Write Minecraft region files
 
 ## Usage
 
