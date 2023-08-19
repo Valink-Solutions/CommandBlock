@@ -7,6 +7,79 @@ use std::{
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeMap, Serialize};
 
+#[derive(Debug)]
+pub enum Compression {
+    Uncompressed,
+    Gzip,
+    Zlib,
+}
+
+/// ```
+#[derive(Debug, PartialEq)]
+pub enum Endian {
+    Big,
+    Little,
+}
+
+#[derive(Debug)]
+pub enum NbtError {
+    IoError(std::io::Error),
+    InvalidTagType(u8),
+    InvalidCompression(u8),
+    InvalidString(std::string::FromUtf8Error),
+    InvalidListType(u8),
+    InvalidCompoundType(u8),
+    InvalidByteArrayLength(usize),
+    InvalidIntArrayLength(usize),
+    InvalidLongArrayLength(usize),
+}
+
+impl From<std::io::Error> for NbtError {
+    fn from(e: std::io::Error) -> NbtError {
+        NbtError::IoError(e)
+    }
+}
+
+impl Display for NbtError {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        match *self {
+            NbtError::IoError(ref err) => write!(f, "IO error: {}", err),
+            NbtError::InvalidTagType(ref tag) => write!(f, "Invalid tag type: {}", tag),
+            NbtError::InvalidCompression(ref compression) => {
+                write!(f, "Invalid compression type: {}", compression)
+            }
+            NbtError::InvalidString(ref err) => write!(f, "Invalid string: {}", err),
+            NbtError::InvalidListType(ref tag) => write!(f, "Invalid list type: {}", tag),
+            NbtError::InvalidCompoundType(ref tag) => write!(f, "Invalid compound type: {}", tag),
+            NbtError::InvalidByteArrayLength(ref len) => {
+                write!(f, "Invalid byte array length: {}", len)
+            }
+            NbtError::InvalidIntArrayLength(ref len) => {
+                write!(f, "Invalid int array length: {}", len)
+            }
+            NbtError::InvalidLongArrayLength(ref len) => {
+                write!(f, "Invalid long array length: {}", len)
+            }
+        }
+    }
+}
+
+impl Error for NbtError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match *self {
+            NbtError::IoError(ref err) => Some(err),
+            NbtError::InvalidTagType(_) => None,
+            NbtError::InvalidCompression(_) => None,
+            NbtError::InvalidString(ref err) => Some(err),
+            NbtError::InvalidListType(_) => None,
+            NbtError::InvalidCompoundType(_) => None,
+            NbtError::InvalidByteArrayLength(_) => None,
+            NbtError::InvalidIntArrayLength(_) => None,
+            NbtError::InvalidLongArrayLength(_) => None,
+        }
+    }
+}
+
 #[derive(PartialEq, Clone)]
 pub enum NbtValue {
     End,
@@ -95,6 +168,82 @@ impl Debug for NbtValue {
 }
 
 impl NbtValue {
+    pub fn new() -> NbtValue {
+        NbtValue::Compound(HashMap::new())
+    }
+
+    pub fn insert<T: Into<NbtValue>>(&mut self, key: String, value: T) {
+        match self {
+            NbtValue::Compound(ref mut map) => {
+                map.insert(key, value.into());
+            }
+            _ => panic!("Cannot insert into non-compound NBT value"),
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&NbtValue> {
+        match self {
+            NbtValue::Compound(ref map) => map.get(key),
+            _ => panic!("Cannot get from non-compound NBT value"),
+        }
+    }
+
+    pub fn get_mut(&mut self, key: &str) -> Option<&mut NbtValue> {
+        match self {
+            NbtValue::Compound(ref mut map) => map.get_mut(key),
+            _ => panic!("Cannot get from non-compound NBT value"),
+        }
+    }
+
+    pub fn remove(&mut self, key: &str) -> Option<NbtValue> {
+        match self {
+            NbtValue::Compound(ref mut map) => map.remove(key),
+            _ => panic!("Cannot remove from non-compound NBT value"),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            NbtValue::Compound(ref map) => map.len(),
+            _ => panic!("Cannot get length of non-compound NBT value"),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        match self {
+            NbtValue::Compound(ref map) => map.is_empty(),
+            _ => panic!("Cannot get length of non-compound NBT value"),
+        }
+    }
+
+    pub fn keys(&self) -> Vec<&String> {
+        match self {
+            NbtValue::Compound(ref map) => map.keys().collect(),
+            _ => panic!("Cannot get keys of non-compound NBT value"),
+        }
+    }
+
+    pub fn values(&self) -> Vec<&NbtValue> {
+        match self {
+            NbtValue::Compound(ref map) => map.values().collect(),
+            _ => panic!("Cannot get values of non-compound NBT value"),
+        }
+    }
+
+    pub fn iter(&self) -> std::collections::hash_map::Iter<String, NbtValue> {
+        match self {
+            NbtValue::Compound(ref map) => map.iter(),
+            _ => panic!("Cannot iterate over non-compound NBT value"),
+        }
+    }
+
+    pub fn iter_mut(&mut self) -> std::collections::hash_map::IterMut<String, NbtValue> {
+        match self {
+            NbtValue::Compound(ref mut map) => map.iter_mut(),
+            _ => panic!("Cannot iterate over non-compound NBT value"),
+        }
+    }
+
     pub fn from_binary(value: u8) -> Option<NbtValue> {
         match value {
             0x0 => Some(NbtValue::End),
@@ -137,74 +286,198 @@ impl NbtValue {
     }
 }
 
-#[derive(Debug)]
-pub enum Compression {
-    Uncompressed,
-    Gzip,
-    Zlib,
-}
+// Explicitly implement From for all types that can be converted to NbtValue
 
-#[derive(Debug)]
-pub enum NbtError {
-    IoError(std::io::Error),
-    InvalidTagType(u8),
-    InvalidCompression(u8),
-    InvalidString(std::string::FromUtf8Error),
-    InvalidListType(u8),
-    InvalidCompoundType(u8),
-    InvalidByteArrayLength(usize),
-    InvalidIntArrayLength(usize),
-    InvalidLongArrayLength(usize),
-}
-
-impl From<std::io::Error> for NbtError {
-    fn from(e: std::io::Error) -> NbtError {
-        NbtError::IoError(e)
+impl From<i8> for NbtValue {
+    fn from(value: i8) -> Self {
+        NbtValue::Byte(value)
     }
 }
 
-impl Display for NbtError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        match *self {
-            NbtError::IoError(ref err) => write!(f, "IO error: {}", err),
-            NbtError::InvalidTagType(ref tag) => write!(f, "Invalid tag type: {}", tag),
-            NbtError::InvalidCompression(ref compression) => {
-                write!(f, "Invalid compression type: {}", compression)
-            }
-            NbtError::InvalidString(ref err) => write!(f, "Invalid string: {}", err),
-            NbtError::InvalidListType(ref tag) => write!(f, "Invalid list type: {}", tag),
-            NbtError::InvalidCompoundType(ref tag) => write!(f, "Invalid compound type: {}", tag),
-            NbtError::InvalidByteArrayLength(ref len) => {
-                write!(f, "Invalid byte array length: {}", len)
-            }
-            NbtError::InvalidIntArrayLength(ref len) => {
-                write!(f, "Invalid int array length: {}", len)
-            }
-            NbtError::InvalidLongArrayLength(ref len) => {
-                write!(f, "Invalid long array length: {}", len)
-            }
+impl From<i16> for NbtValue {
+    fn from(value: i16) -> Self {
+        NbtValue::Short(value)
+    }
+}
+
+impl From<i32> for NbtValue {
+    fn from(value: i32) -> Self {
+        NbtValue::Int(value)
+    }
+}
+
+impl From<i64> for NbtValue {
+    fn from(value: i64) -> Self {
+        NbtValue::Long(value)
+    }
+}
+
+impl From<f32> for NbtValue {
+    fn from(value: f32) -> Self {
+        NbtValue::Float(value)
+    }
+}
+
+impl From<f64> for NbtValue {
+    fn from(value: f64) -> Self {
+        NbtValue::Double(value)
+    }
+}
+
+impl From<Vec<i8>> for NbtValue {
+    fn from(value: Vec<i8>) -> Self {
+        NbtValue::ByteArray(value)
+    }
+}
+
+impl From<&str> for NbtValue {
+    fn from(item: &str) -> Self {
+        NbtValue::String(item.to_string())
+    }
+}
+
+impl From<&String> for NbtValue {
+    fn from(item: &String) -> Self {
+        NbtValue::String(item.clone())
+    }
+}
+
+impl From<String> for NbtValue {
+    fn from(item: String) -> Self {
+        NbtValue::String(item)
+    }
+}
+
+impl From<Vec<NbtValue>> for NbtValue {
+    fn from(value: Vec<NbtValue>) -> Self {
+        NbtValue::List(value)
+    }
+}
+
+impl From<HashMap<String, NbtValue>> for NbtValue {
+    fn from(value: HashMap<String, NbtValue>) -> Self {
+        NbtValue::Compound(value)
+    }
+}
+
+impl From<Vec<i32>> for NbtValue {
+    fn from(value: Vec<i32>) -> Self {
+        NbtValue::IntArray(value)
+    }
+}
+
+impl From<Vec<i64>> for NbtValue {
+    fn from(value: Vec<i64>) -> Self {
+        NbtValue::LongArray(value)
+    }
+}
+
+// Explicitly implement From for all types that can be converted from NbtValue
+
+impl From<&NbtValue> for i8 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Byte(v) => *v,
+            _ => panic!("Cannot convert {:?} to i8", value),
         }
     }
 }
 
-impl Error for NbtError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match *self {
-            NbtError::IoError(ref err) => Some(err),
-            NbtError::InvalidTagType(_) => None,
-            NbtError::InvalidCompression(_) => None,
-            NbtError::InvalidString(ref err) => Some(err),
-            NbtError::InvalidListType(_) => None,
-            NbtError::InvalidCompoundType(_) => None,
-            NbtError::InvalidByteArrayLength(_) => None,
-            NbtError::InvalidIntArrayLength(_) => None,
-            NbtError::InvalidLongArrayLength(_) => None,
+impl From<&NbtValue> for i16 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Short(v) => *v,
+            _ => panic!("Cannot convert {:?} to i16", value),
         }
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Endian {
-    Big,
-    Little,
+impl From<&NbtValue> for i32 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Int(v) => *v,
+            _ => panic!("Cannot convert {:?} to i32", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for i64 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Long(v) => *v,
+            _ => panic!("Cannot convert {:?} to i64", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for f32 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Float(v) => *v,
+            _ => panic!("Cannot convert {:?} to f32", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for f64 {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Double(v) => *v,
+            _ => panic!("Cannot convert {:?} to f64", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for Vec<i8> {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::ByteArray(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to Vec<i8>", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for String {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::String(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to String", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for Vec<NbtValue> {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::List(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to Vec<NbtValue>", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for HashMap<String, NbtValue> {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::Compound(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to HashMap<String, NbtValue>", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for Vec<i32> {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::IntArray(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to Vec<i32>", value),
+        }
+    }
+}
+
+impl From<&NbtValue> for Vec<i64> {
+    fn from(value: &NbtValue) -> Self {
+        match value {
+            NbtValue::LongArray(v) => v.clone(),
+            _ => panic!("Cannot convert {:?} to Vec<i64>", value),
+        }
+    }
 }
