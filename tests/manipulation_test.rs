@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use commandblock::{read_from_file, Compression, NbtValue};
+use commandblock::nbt::{read_from_file, Compression, NbtValue};
 
 #[test]
 fn test_create_compound() {
@@ -65,7 +65,11 @@ fn test_reading_and_manipulating_nbtvalue() {
         .join("data")
         .join("bedrock_level.dat");
 
-    match read_from_file(java_data_path, Compression::Gzip, commandblock::Endian::Big) {
+    match read_from_file(
+        java_data_path,
+        Compression::Gzip,
+        commandblock::nbt::Endian::Big,
+    ) {
         Ok(mut java_result) => {
             java_result.insert("LevelName".to_string(), "Java Data Test (modified)");
 
@@ -86,7 +90,7 @@ fn test_reading_and_manipulating_nbtvalue() {
     match read_from_file(
         bedrock_data_path,
         Compression::Uncompressed,
-        commandblock::Endian::Little,
+        commandblock::nbt::Endian::Little,
     ) {
         Ok(mut bedrock_result) => {
             bedrock_result.insert("LevelName".to_string(), "Bedrock Data Test (modified)");

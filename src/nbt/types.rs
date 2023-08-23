@@ -14,7 +14,6 @@ pub enum Compression {
     Zlib,
 }
 
-/// ```
 #[derive(Debug, PartialEq)]
 pub enum Endian {
     Big,
@@ -23,6 +22,7 @@ pub enum Endian {
 
 #[derive(Debug)]
 pub enum NbtError {
+    EmptyList,
     IoError(std::io::Error),
     InvalidTagType(u8),
     InvalidCompression(u8),
@@ -43,6 +43,7 @@ impl From<std::io::Error> for NbtError {
 impl Display for NbtError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match *self {
+            NbtError::EmptyList => write!(f, "Empty list"),
             NbtError::IoError(ref err) => write!(f, "IO error: {}", err),
             NbtError::InvalidTagType(ref tag) => write!(f, "Invalid tag type: {}", tag),
             NbtError::InvalidCompression(ref compression) => {
@@ -67,6 +68,7 @@ impl Display for NbtError {
 impl Error for NbtError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
+            NbtError::EmptyList => None,
             NbtError::IoError(ref err) => Some(err),
             NbtError::InvalidTagType(_) => None,
             NbtError::InvalidCompression(_) => None,

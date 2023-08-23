@@ -1,3 +1,1 @@
-mod nbt;
-
-pub use nbt::*;
+pub mod nbt;
