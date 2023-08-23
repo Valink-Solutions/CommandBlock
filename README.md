@@ -1,7 +1,5 @@
 # CommandBlock - Rust Library for Minecraft Data Handling
 
-CommandBlock is a Rust-based library designed to handle various Minecraft-related data formats, including NBT (Named Binary Tag) data, Anvil data, and region files. This library is a work in progress and is currently not recommended for production use. It is made public for the purpose of contribution and collaboration.
-
 > **Warning**
 > This library is a work in progress and is not recommended for use in production environments. Currently it is only public for educational and contribution purposes only.
 
@@ -14,8 +12,8 @@ The primary aim of CommandBlock is to provide a versatile Rust-based solution fo
 - NBT Data Handling
     - [x] Parse NBT data structures
     - [x] NBT to Serde compatible structures
-    - [ ] Manipulate NBT data structures
-    - [ ] Write NBT data structures
+    - [x] Manipulate NBT data structures
+    - [x] Write NBT data structures
 - Anvil Data Handling
     - [ ] Parse Anvil data structures
     - [ ] Interpret Anvil data structures

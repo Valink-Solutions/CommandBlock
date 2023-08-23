@@ -56,6 +56,10 @@ impl<R: Read> NbtReader<R> {
                 let list_tag_type = NbtValue::from_binary(initial_byte);
                 let array_length = self.parse_int()?;
 
+                if array_length == 0 {
+                    return Ok(NbtValue::List(Vec::new()));
+                }
+
                 if list_tag_type.is_none() {
                     return Err(NbtError::InvalidTagType(initial_byte));
                 }
@@ -114,29 +118,27 @@ impl<R: Read> NbtReader<R> {
     }
 
     pub fn parse_data(&mut self) -> Result<(String, NbtValue), NbtError> {
-        let mut header = [0_u8; 1];
-        self.reader.read_exact(&mut header)?;
+        match self.endian {
+            Endian::Big => {}
+            Endian::Little => {
+                let _file_type = self.reader.read_i32::<LittleEndian>()?;
+                let _file_length = self.reader.read_i32::<LittleEndian>()?;
+            }
+        };
 
-        if let Some(tag) = NbtValue::from_binary(header[0]) {
+        let header = self.reader.read_u8()?;
+
+        if let Some(tag) = NbtValue::from_binary(header) {
             if let NbtValue::End = tag {
                 return Ok((String::new(), NbtValue::End));
             }
 
             let name = self.parse_string()?;
-            let value = if self.endian == Endian::Little {
-                let mut header = [0_u8; 8];
-                self.reader.read_exact(&mut header)?;
-                let _ = i32::from_le_bytes(header[..4].try_into().unwrap());
-                let _ = i32::from_le_bytes(header[4..].try_into().unwrap());
-                // Parse the file_type and file_length if needed
-                self.parse_nbt_value(tag.to_binary())?
-            } else {
-                self.parse_nbt_value(tag.to_binary())?
-            };
+            let value = self.parse_nbt_value(tag.to_binary())?;
 
             Ok((name, value))
         } else {
-            Err(NbtError::InvalidTagType(header[0]))
+            Err(NbtError::InvalidTagType(header))
         }
     }
 

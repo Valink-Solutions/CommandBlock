@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
-use commandblock::{read_from_file, Compression, NbtReader, NbtValue};
+use commandblock::nbt::{read_from_file, Compression, NbtReader, NbtValue};
 
 #[test]
 fn test_parse_nbt_value_end() {
     let data = [0x00];
-    let result = NbtReader::new(&data[..], commandblock::Endian::Big)
+    let result = NbtReader::new(&data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x00)
         .unwrap();
     assert_eq!(result, NbtValue::End);
@@ -14,7 +14,7 @@ fn test_parse_nbt_value_end() {
 #[test]
 fn test_parse_nbt_value_byte() {
     let data = [0x7F];
-    let result = NbtReader::new(&data[..], commandblock::Endian::Big)
+    let result = NbtReader::new(&data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x01)
         .unwrap();
     assert_eq!(result, NbtValue::Byte(127));
@@ -23,12 +23,12 @@ fn test_parse_nbt_value_byte() {
 #[test]
 fn test_parse_nbt_value_short() {
     let java_data = [0x7F, 0xFF];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x02)
         .unwrap();
 
     let bedrock_data = [0xFF, 0x7F];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x02)
         .unwrap();
 
@@ -39,12 +39,12 @@ fn test_parse_nbt_value_short() {
 #[test]
 fn test_parse_nbt_value_int() {
     let java_data = [0x7F, 0xFF, 0xFF, 0xFF];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x03)
         .unwrap();
 
     let bedrock_data = [0xFF, 0xFF, 0xFF, 0x7F];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x03)
         .unwrap();
 
@@ -55,12 +55,12 @@ fn test_parse_nbt_value_int() {
 #[test]
 fn test_parse_nbt_value_long() {
     let java_data = [0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x04)
         .unwrap();
 
     let bedrock_data = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x04)
         .unwrap();
 
@@ -71,12 +71,12 @@ fn test_parse_nbt_value_long() {
 #[test]
 fn test_parse_nbt_value_float() {
     let java_data = [0x7F, 0x7F, 0xFF, 0xFF];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x05)
         .unwrap();
 
     let bedrock_data = [0xFF, 0xFF, 0x7F, 0x7F];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x05)
         .unwrap();
 
@@ -87,12 +87,12 @@ fn test_parse_nbt_value_float() {
 #[test]
 fn test_parse_nbt_value_double() {
     let java_data = [0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x06)
         .unwrap();
 
     let bedrock_data = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEF, 0x7F];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x06)
         .unwrap();
 
@@ -106,7 +106,7 @@ fn test_parse_nbt_value_byte_array() {
         0x00, 0x00, 0x00, 0x02, // array length
         0x7F, 0x7F, // array values
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x07)
         .unwrap();
 
@@ -114,7 +114,7 @@ fn test_parse_nbt_value_byte_array() {
         0x02, 0x00, 0x00, 0x00, // array length
         0x7F, 0x7F, // array values
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x07)
         .unwrap();
 
@@ -128,7 +128,7 @@ fn test_parse_nbt_value_string() {
         0x00, 0x02, // string length
         0x41, 0x42, // string value
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x08)
         .unwrap();
 
@@ -136,7 +136,7 @@ fn test_parse_nbt_value_string() {
         0x02, 0x00, // string length
         0x41, 0x42, // string value
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x08)
         .unwrap();
 
@@ -151,7 +151,7 @@ fn test_parse_nbt_value_list() {
         0x00, 0x00, 0x00, 0x02, // array length
         0x7F, 0x7F, // array values
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x09)
         .unwrap();
 
@@ -160,7 +160,7 @@ fn test_parse_nbt_value_list() {
         0x02, 0x00, 0x00, 0x00, // array length
         0x7F, 0x7F, // array values
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x09)
         .unwrap();
 
@@ -183,7 +183,7 @@ fn test_parse_nbt_value_compound() {
         0x7F, // value
         0x00, // end tag
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x0A)
         .unwrap();
 
@@ -194,7 +194,7 @@ fn test_parse_nbt_value_compound() {
         0x7F, // value
         0x00, // end tag
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x0A)
         .unwrap();
 
@@ -216,7 +216,7 @@ fn test_parse_nbt_value_int_array() {
         0x00, 0x00, 0x00, 0x01, // array values
         0x00, 0x00, 0x00, 0x02, // array values
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x0B)
         .unwrap();
 
@@ -225,7 +225,7 @@ fn test_parse_nbt_value_int_array() {
         0x01, 0x00, 0x00, 0x00, // array values
         0x02, 0x00, 0x00, 0x00, // array values
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x0B)
         .unwrap();
 
@@ -240,7 +240,7 @@ fn test_parse_nbt_value_long_array() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // array values
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
     ];
-    let java_result = NbtReader::new(&java_data[..], commandblock::Endian::Big)
+    let java_result = NbtReader::new(&java_data[..], commandblock::nbt::Endian::Big)
         .parse_nbt_value(0x0C)
         .unwrap();
 
@@ -249,7 +249,7 @@ fn test_parse_nbt_value_long_array() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // array values
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
-    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::Endian::Little)
+    let bedrock_result = NbtReader::new(&bedrock_data[..], commandblock::nbt::Endian::Little)
         .parse_nbt_value(0x0C)
         .unwrap();
 
@@ -264,12 +264,16 @@ fn test_read_from_dat_file() {
         .join("data")
         .join("bedrock_level.dat");
 
-    let java_result = read_from_file(java_data_path, Compression::Gzip, commandblock::Endian::Big);
+    let java_result = read_from_file(
+        java_data_path,
+        Compression::Gzip,
+        commandblock::nbt::Endian::Big,
+    );
 
     let bedrock_result = read_from_file(
         bedrock_data_path,
         Compression::Uncompressed,
-        commandblock::Endian::Little,
+        commandblock::nbt::Endian::Little,
     );
 
     match java_result {
