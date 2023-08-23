@@ -21,7 +21,7 @@ use crate::nbt::types::{Compression, Endian, NbtError, NbtValue};
 /// use std::io::Cursor;
 ///
 /// let mut value = NbtValue::new();
-/// value.insert("test", "test string");
+/// value.insert("test".to_string(), "test string");
 ///
 /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
 /// writer.write_data(Some("root"), value).unwrap();
@@ -68,7 +68,7 @@ impl<W: Write> NbtWriter<W> {
     /// use std::io::Cursor;
     ///
     /// let mut value = NbtValue::new();
-    /// value.insert("test", "test string");
+    /// value.insert("test".to_string(), "test string");
     ///
     /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
     /// writer.write_nbt_value(value).unwrap();
@@ -138,7 +138,7 @@ impl<W: Write> NbtWriter<W> {
     /// use std::io::Cursor;
     ///
     /// let mut value = NbtValue::new();
-    /// value.insert("test", "test string");
+    /// value.insert("test".to_string(), "test string");
     ///
     /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
     /// writer.write_data(Some("root"), value).unwrap();
@@ -309,9 +309,9 @@ impl<W: Write> NbtWriter<W> {
 /// use std::path::PathBuf;
 ///
 /// let mut value = NbtValue::new();
-/// value.insert("test", "test string");
+/// value.insert("test".to_string(), "test string");
 ///
-/// let path = PathBuf::from("path/to/file.nbt");
+/// let path = PathBuf::from("./tests/data/test.dat");
 ///
 /// write_to_file(None, value, path, Compression::Uncompressed, Endian::Little).unwrap();
 /// ```
@@ -366,7 +366,7 @@ pub fn write_to_file(
 /// use std::io::Cursor;
 ///
 /// let mut value = NbtValue::new();
-/// value.insert("test", "test string");
+/// value.insert("test".to_string(), "test string");
 ///
 /// let mut writer = Cursor::new(Vec::new());
 ///

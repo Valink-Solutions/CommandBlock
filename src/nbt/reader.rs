@@ -151,7 +151,7 @@ impl<R: Read> NbtReader<R> {
     /// use commandblock::nbt::{NbtReader, Endian};
     /// use std::fs::File;
     ///
-    /// let file = File::open("path/to/file.nbt").unwrap();
+    /// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
     /// let mut reader = NbtReader::new(file, Endian::Little);
     ///
     /// let (name, value) = reader.parse_data().unwrap();
@@ -284,7 +284,7 @@ impl<R: Read> NbtReader<R> {
 /// use commandblock::nbt::{read_from_file, Compression, Endian};
 /// use std::path::PathBuf;
 ///
-/// let path = PathBuf::from("path/to/file.nbt");
+/// let path = PathBuf::from("./tests/data/bedrock_level.dat");
 ///
 /// let value = read_from_file(path, Compression::Uncompressed, Endian::Little).unwrap();
 /// ```
@@ -332,7 +332,7 @@ pub fn read_from_file(
 /// use commandblock::nbt::{read_from_reader, Compression, Endian};
 /// use std::fs::File;
 ///
-/// let file = File::open("path/to/file.nbt").unwrap();
+/// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
 ///
 /// let value = read_from_reader(file, Compression::Uncompressed, Endian::Little).unwrap();
 /// ```

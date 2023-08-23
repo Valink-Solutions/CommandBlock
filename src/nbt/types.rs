@@ -208,6 +208,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let nbt = NbtValue::new();
     /// ```
     ///
@@ -228,6 +230,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// ```
@@ -249,6 +253,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let value = nbt.get("key");
@@ -274,6 +280,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let value = nbt.get_mut("key");
@@ -299,6 +307,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let value = nbt.remove("key");
@@ -320,6 +330,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let len = nbt.len();
@@ -340,6 +352,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let nbt = NbtValue::new();
     /// let is_empty = nbt.is_empty();
     /// ```
@@ -360,6 +374,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let keys = nbt.keys();
@@ -380,6 +396,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let values = nbt.values();
@@ -400,6 +418,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let iter = nbt.iter();
@@ -420,6 +440,8 @@ impl NbtValue {
     /// # Examples
     ///
     /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
     /// let mut nbt = NbtValue::new();
     /// nbt.insert("key".to_string(), 1);
     /// let iter_mut = nbt.iter_mut();
