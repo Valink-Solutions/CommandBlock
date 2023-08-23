@@ -1,11 +1,14 @@
 # CommandBlock - Rust Library for Minecraft Data Handling
 
+[![Crates.io](https://img.shields.io/crates/v/commandblock.svg)](https://crates.io/crates/commandblock)
+[![Documentation](https://docs.rs/commandblock/badge.svg)](https://docs.rs/commandblock/)
+
 > **Warning**
 > This library is a work in progress and is not recommended for use in production environments. Currently it is only public for educational and contribution purposes only.
 
 ## Purpose
 
-The primary aim of CommandBlock is to provide a versatile Rust-based solution for handling Minecraft data commonly found in formats like NBT, Anvil, and region files. The library is being developed to assist projects like [ChunkVault](https://chunkvault.com), where efficient parsing and manipulation of Minecraft world data is essential.
+The primary aim of CommandBlock is to provide a versatile Rust-based solution for handling Minecraft data commonly found in formats like NBT, Anvil, and region files. This library is designed to handle data from both Java Edition and Bedrock Edition of Minecraft. The library is being developed to assist projects like [ChunkVault](https://chunkvault.com), where efficient parsing and manipulation of Minecraft world data is essential.
 
 ## Features (Planned)
 
@@ -28,6 +31,20 @@ The primary aim of CommandBlock is to provide a versatile Rust-based solution fo
 ## Usage
 
 As of now, the library is under active development and is not ready for production use. You are welcome to explore the code and contribute to its development.
+
+### Installation
+
+To install CommandBlock, add the following to your `Cargo.toml` file:
+
+```toml 
+[dependencies]
+commandblock = { version = "0.4.1", features = ["serde"] }
+```
+
+### Examples
+
+follow the [documentation](https://docs.rs/commandblock) for examples on how to use the library.
+
 
 ## Contributing
 

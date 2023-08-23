@@ -70,7 +70,7 @@ fn test_reading_and_manipulating_nbtvalue() {
         Compression::Gzip,
         commandblock::nbt::Endian::Big,
     ) {
-        Ok(mut java_result) => {
+        Ok((_, mut java_result)) => {
             java_result.insert("LevelName".to_string(), "Java Data Test (modified)");
 
             if let NbtValue::Compound(map) = java_result {
@@ -92,7 +92,7 @@ fn test_reading_and_manipulating_nbtvalue() {
         Compression::Uncompressed,
         commandblock::nbt::Endian::Little,
     ) {
-        Ok(mut bedrock_result) => {
+        Ok((_, mut bedrock_result)) => {
             bedrock_result.insert("LevelName".to_string(), "Bedrock Data Test (modified)");
 
             if let NbtValue::Compound(map) = bedrock_result {
