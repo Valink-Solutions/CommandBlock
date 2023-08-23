@@ -277,7 +277,7 @@ fn test_read_from_dat_file() {
     );
 
     match java_result {
-        Ok(NbtValue::Compound(value)) => {
+        Ok((_, NbtValue::Compound(value))) => {
             println!("Java Data: {:?} \n", value);
             assert!(true)
         }
@@ -290,7 +290,7 @@ fn test_read_from_dat_file() {
     }
 
     match bedrock_result {
-        Ok(NbtValue::Compound(value)) => {
+        Ok((_, NbtValue::Compound(value))) => {
             println!("Bedrock Data: {:?} \n", value);
             assert!(true)
         }

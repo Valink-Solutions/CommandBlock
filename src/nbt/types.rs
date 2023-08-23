@@ -7,30 +7,48 @@ use std::{
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeMap, Serialize};
 
+/// Enum representing the different types of compression that can be used.
 #[derive(Debug)]
 pub enum Compression {
+    /// No compression is used.
     Uncompressed,
+    /// Gzip compression is used.
     Gzip,
+    /// Zlib compression is used.
     Zlib,
 }
 
+/// Enum representing the endianness of the data.
+///
+/// Big is used mostly for Java, while Little is used for everything else, i.e., Bedrock.
 #[derive(Debug, PartialEq)]
 pub enum Endian {
     Big,
     Little,
 }
 
+/// Enum representing the different types of NBT errors that can occur.
 #[derive(Debug)]
 pub enum NbtError {
+    /// Represents an error where an NBT list is empty.
     EmptyList,
+    /// Represents an IO error.
     IoError(std::io::Error),
+    /// Represents an error where an invalid tag type is used.
     InvalidTagType(u8),
+    /// Represents an error where an invalid compression type is used.
     InvalidCompression(u8),
+    /// Represents an error where an invalid string is used.
     InvalidString(std::string::FromUtf8Error),
+    /// Represents an error where an invalid list type is used.
     InvalidListType(u8),
+    /// Represents an error where an invalid compound type is used.
     InvalidCompoundType(u8),
+    /// Represents an error where an invalid byte array length is used.
     InvalidByteArrayLength(usize),
+    /// Represents an error where an invalid int array length is used.
     InvalidIntArrayLength(usize),
+    /// Represents an error where an invalid long array length is used.
     InvalidLongArrayLength(usize),
 }
 
@@ -82,20 +100,35 @@ impl Error for NbtError {
     }
 }
 
+/// Enum representing the different types of NBT (Named Binary Tag) values that can be used.
+/// These types are used to represent data in a Minecraft world file.
 #[derive(PartialEq, Clone)]
 pub enum NbtValue {
+    /// Represents the end of a compound NBT tag.
     End,
+    /// Represents a byte (8 bits).
     Byte(i8),
+    /// Represents a short integer (16 bits).
     Short(i16),
+    /// Represents an integer (32 bits).
     Int(i32),
+    /// Represents a long integer (64 bits).
     Long(i64),
+    /// Represents a floating point number (32 bits).
     Float(f32),
+    /// Represents a double precision floating point number (64 bits).
     Double(f64),
+    /// Represents an array of bytes.
     ByteArray(Vec<i8>),
+    /// Represents a string.
     String(String),
+    /// Represents a list of NBT values.
     List(Vec<NbtValue>),
+    /// Represents a compound NBT tag, which is a collection of NBT tags.
     Compound(HashMap<String, NbtValue>),
+    /// Represents an array of integers (32 bits each).
     IntArray(Vec<i32>),
+    /// Represents an array of long integers (64 bits each).
     LongArray(Vec<i64>),
 }
 
@@ -170,10 +203,38 @@ impl Debug for NbtValue {
 }
 
 impl NbtValue {
+    /// Creates a new `NbtValue::Compound` with an empty `HashMap`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let nbt = NbtValue::new();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `NbtValue::Compound(HashMap::new())`
     pub fn new() -> NbtValue {
         NbtValue::Compound(HashMap::new())
     }
 
+    /// Inserts a key-value pair into the `NbtValue::Compound`.
+    ///
+    /// # Arguments
+    ///
+    /// * `key: String` - A string that holds the key.
+    /// * `value: T` - A value that can be converted into `NbtValue`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// ```
     pub fn insert<T: Into<NbtValue>>(&mut self, key: String, value: T) {
         match self {
             NbtValue::Compound(ref mut map) => {
@@ -183,6 +244,26 @@ impl NbtValue {
         }
     }
 
+    /// Returns a reference to the value corresponding to the key in the `NbtValue::Compound`.
+    ///
+    /// # Arguments
+    ///
+    /// * `key: &str` - A string slice that holds the key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let value = nbt.get("key");
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Some(&NbtValue)` - If the key was present.
+    /// * `None` - If the key was not present.
     pub fn get(&self, key: &str) -> Option<&NbtValue> {
         match self {
             NbtValue::Compound(ref map) => map.get(key),
@@ -190,6 +271,26 @@ impl NbtValue {
         }
     }
 
+    /// Returns a mutable reference to the value corresponding to the key in the `NbtValue::Compound`.
+    ///
+    /// # Arguments
+    ///
+    /// * `key: &str` - A string slice that holds the key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let value = nbt.get_mut("key");
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Some(&mut NbtValue)` - If the key was present.
+    /// * `None` - If the key was not present.
     pub fn get_mut(&mut self, key: &str) -> Option<&mut NbtValue> {
         match self {
             NbtValue::Compound(ref mut map) => map.get_mut(key),
@@ -197,6 +298,26 @@ impl NbtValue {
         }
     }
 
+    /// Removes a key from the `NbtValue::Compound`, returning the value at the key if the key was previously in the `NbtValue::Compound`.
+    ///
+    /// # Arguments
+    ///
+    /// * `key: &str` - A string slice that holds the key.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let value = nbt.remove("key");
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Some(NbtValue)` - If the key was present.
+    /// * `None` - If the key was not present.
     pub fn remove(&mut self, key: &str) -> Option<NbtValue> {
         match self {
             NbtValue::Compound(ref mut map) => map.remove(key),
@@ -204,6 +325,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns the number of elements in the `NbtValue::Compound`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let len = nbt.len();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `usize` - The number of elements in the `NbtValue::Compound`.
     pub fn len(&self) -> usize {
         match self {
             NbtValue::Compound(ref map) => map.len(),
@@ -211,6 +347,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns `true` if the `NbtValue::Compound` contains no elements.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let nbt = NbtValue::new();
+    /// let is_empty = nbt.is_empty();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `true` - If the `NbtValue::Compound` contains no elements.
+    /// * `false` - Otherwise.
     pub fn is_empty(&self) -> bool {
         match self {
             NbtValue::Compound(ref map) => map.is_empty(),
@@ -218,6 +369,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns a vector containing references to the keys of the `NbtValue::Compound`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let keys = nbt.keys();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Vec<&String>` - A vector containing references to the keys of the `NbtValue::Compound`.
     pub fn keys(&self) -> Vec<&String> {
         match self {
             NbtValue::Compound(ref map) => map.keys().collect(),
@@ -225,6 +391,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns a vector containing references to the values of the `NbtValue::Compound`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let values = nbt.values();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Vec<&NbtValue>` - A vector containing references to the values of the `NbtValue::Compound`.
     pub fn values(&self) -> Vec<&NbtValue> {
         match self {
             NbtValue::Compound(ref map) => map.values().collect(),
@@ -232,6 +413,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns an iterator over the `NbtValue::Compound`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let iter = nbt.iter();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `std::collections::hash_map::Iter<String, NbtValue>` - An iterator over the `NbtValue::Compound`.
     pub fn iter(&self) -> std::collections::hash_map::Iter<String, NbtValue> {
         match self {
             NbtValue::Compound(ref map) => map.iter(),
@@ -239,6 +435,21 @@ impl NbtValue {
         }
     }
 
+    /// Returns a mutable iterator over the `NbtValue::Compound`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::NbtValue;
+    ///
+    /// let mut nbt = NbtValue::new();
+    /// nbt.insert("key".to_string(), 1);
+    /// let iter_mut = nbt.iter_mut();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `std::collections::hash_map::IterMut<String, NbtValue>` - A mutable iterator over the `NbtValue::Compound`.
     pub fn iter_mut(&mut self) -> std::collections::hash_map::IterMut<String, NbtValue> {
         match self {
             NbtValue::Compound(ref mut map) => map.iter_mut(),
@@ -289,6 +500,12 @@ impl NbtValue {
 }
 
 // Explicitly implement From for all types that can be converted to NbtValue
+
+impl From<bool> for NbtValue {
+    fn from(value: bool) -> Self {
+        NbtValue::Byte(if value { 1 } else { 0 })
+    }
+}
 
 impl From<i8> for NbtValue {
     fn from(value: i8) -> Self {

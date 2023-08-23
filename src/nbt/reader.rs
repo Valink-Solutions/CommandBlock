@@ -6,16 +6,42 @@ use crate::nbt::types::{Compression, Endian, NbtError, NbtValue};
 
 use flate2::read::{GzDecoder, ZlibDecoder};
 
+/// `NbtReader` is a struct that reads NBT data from a reader and interprets it according to the specified endian style.
+///
+/// # Fields
+///
+/// * `reader: R` - The reader from which NBT data is read. This reader must implement the `Read` trait.
+/// * `endian: Endian` - The endian style (Big or Little) used to interpret the read NBT data.
 pub struct NbtReader<R: Read> {
     reader: R,
     endian: Endian,
 }
 
 impl<R: Read> NbtReader<R> {
+    /// Creates a new `NbtReader` with the given reader and endian style.
+    ///
+    /// # Arguments
+    ///
+    /// * `reader: R` - The reader from which NBT data is read. This reader must implement the `Read` trait.
+    /// * `endian: Endian` - The endian style (Big or Little) used to interpret the read NBT data.
+    ///
+    /// # Returns
+    ///
+    /// * `Self` - A new instance of `NbtReader`.
     pub fn new(reader: R, endian: Endian) -> Self {
         NbtReader { reader, endian }
     }
 
+    /// Parses an NBT value from the reader according to the given tag type.
+    ///
+    /// # Arguments
+    ///
+    /// * `tag_type: u8` - The tag type of the NBT value to be parsed.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(NbtValue)` - On success, returns the parsed NBT value.
+    /// * `Err(NbtError)` - On failure, returns an NbtError.
     pub fn parse_nbt_value(&mut self, tag_type: u8) -> Result<NbtValue, NbtError> {
         match tag_type {
             0x00 => Ok(NbtValue::End),
@@ -117,6 +143,24 @@ impl<R: Read> NbtReader<R> {
         }
     }
 
+    /// Parses the NBT data from the reader and returns the root tag name and the parsed NBT value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::{NbtReader, Endian};
+    /// use std::fs::File;
+    ///
+    /// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
+    /// let mut reader = NbtReader::new(file, Endian::Little);
+    ///
+    /// let (name, value) = reader.parse_data().unwrap();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Ok((String, NbtValue))` - Returns a tuple containing the root tag name and the parsed NBT value on success.
+    /// * `Err(NbtError)` - Returns an NbtError on failure.
     pub fn parse_data(&mut self) -> Result<(String, NbtValue), NbtError> {
         match self.endian {
             Endian::Big => {}
@@ -226,30 +270,96 @@ impl<R: Read> NbtReader<R> {
     }
 }
 
+/// Reads an NBT file from the given path, decompresses it if necessary, and returns the parsed NBT value.
+///
+/// # Arguments
+///
+/// * `path: PathBuf` - A PathBuf that holds the path to the NBT file.
+/// * `compression: Compression` - The compression method used in the NBT file (Uncompressed, Gzip, or Zlib).
+/// * `endian_style: Endian` - The endian style of the NBT file (Big or Little).
+///
+/// # Examples
+///
+/// ```
+/// use commandblock::nbt::{read_from_file, Compression, Endian};
+/// use std::path::PathBuf;
+///
+/// let path = PathBuf::from("./tests/data/bedrock_level.dat");
+///
+/// let value = read_from_file(path, Compression::Uncompressed, Endian::Little).unwrap();
+/// ```
+///
+/// # Returns
+///
+/// * `Ok((String, NbtValue))` - Returns a tuple containing the root tag name and the parsed NBT value on success.
+/// * `Err(NbtError)` - Returns an NbtError on failure.
 pub fn read_from_file(
     path: PathBuf,
     compression: Compression,
     endian_style: Endian,
-) -> Result<NbtValue, NbtError> {
+) -> Result<(String, NbtValue), NbtError> {
     let mut file = File::open(path)?;
 
     match compression {
         Compression::Uncompressed => {
             let mut parser = NbtReader::new(file, endian_style);
-            let (_, value) = parser.parse_data()?;
-            Ok(value)
+            Ok(parser.parse_data()?)
         }
         Compression::Gzip => {
             let mut decoder = GzDecoder::new(&mut file);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            let (_, value) = parser.parse_data()?;
-            Ok(value)
+            Ok(parser.parse_data()?)
         }
         Compression::Zlib => {
             let mut decoder = ZlibDecoder::new(&mut file);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            let (_, value) = parser.parse_data()?;
-            Ok(value)
+            Ok(parser.parse_data()?)
+        }
+    }
+}
+
+/// Reads an NBT file from the given reader, decompresses it if necessary, and returns the parsed NBT value.
+///
+/// # Arguments
+///
+/// * `reader: R` - The reader from which NBT data is read. This reader must implement the `Read` trait.
+/// * `compression: Compression` - The compression method used in the NBT file (Uncompressed, Gzip, or Zlib).
+/// * `endian_style: Endian` - The endian style of the NBT file (Big or Little).
+///
+/// # Examples
+///
+/// ```
+/// use commandblock::nbt::{read_from_reader, Compression, Endian};
+/// use std::fs::File;
+///
+/// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
+///
+/// let value = read_from_reader(file, Compression::Uncompressed, Endian::Little).unwrap();
+/// ```
+///
+/// # Returns
+///
+/// * `Ok((String, NbtValue))` - Returns a tuple containing the root tag name and the parsed NBT value on success.
+/// * `Err(NbtError)` - Returns an NbtError on failure.
+pub fn read_from_reader<R: Read>(
+    mut reader: R,
+    compression: Compression,
+    endian_style: Endian,
+) -> Result<(String, NbtValue), NbtError> {
+    match compression {
+        Compression::Uncompressed => {
+            let mut parser = NbtReader::new(reader, endian_style);
+            Ok(parser.parse_data()?)
+        }
+        Compression::Gzip => {
+            let mut decoder = GzDecoder::new(&mut reader);
+            let mut parser = NbtReader::new(&mut decoder, endian_style);
+            Ok(parser.parse_data()?)
+        }
+        Compression::Zlib => {
+            let mut decoder = ZlibDecoder::new(&mut reader);
+            let mut parser = NbtReader::new(&mut decoder, endian_style);
+            Ok(parser.parse_data()?)
         }
     }
 }

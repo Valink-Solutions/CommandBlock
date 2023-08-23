@@ -4,16 +4,80 @@ use byteorder::{BigEndian, LittleEndian, WriteBytesExt};
 
 use crate::nbt::types::{Compression, Endian, NbtError, NbtValue};
 
+/// `NbtWriter` is a struct that writes NBT data to a writer encoding it according to the specified endian style.
+///
+/// While this struct can be used directly, it is recommended to use the `write_to_file` or `write_to_writer` functions
+/// for most cases as they will handle compression and error handling for you.
+///
+/// # Fields
+///
+/// * `writer: W` - The writer to which NBT data is written. This writer must implement the `Write` trait.
+/// * `endian: Endian` - The endian style (Big or Little) used to write the NBT data.
+///
+/// # Examples
+///
+/// ```
+/// use commandblock::nbt::{NbtValue, NbtWriter, Endian};
+/// use std::io::Cursor;
+///
+/// let mut value = NbtValue::new();
+/// value.insert("test".to_string(), "test string");
+///
+/// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
+/// writer.write_data(Some("root"), value).unwrap();
+/// ```
 pub struct NbtWriter<W: Write> {
     writer: W,
     endian: Endian,
 }
 
 impl<W: Write> NbtWriter<W> {
-    fn new(writer: W, endian: Endian) -> Self {
+    /// Creates a new NbtWriter.
+    ///
+    /// # Arguments
+    ///
+    /// * `writer: W` - The writer to which NBT data is written. This writer must implement the `Write` trait.
+    /// * `endian: Endian` - The endian style (Big or Little) used to write the NBT data.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::{NbtWriter, Endian};
+    /// use std::io::Cursor;
+    ///
+    /// let writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Self` - A new instance of NbtWriter.
+    pub fn new(writer: W, endian: Endian) -> Self {
         NbtWriter { writer, endian }
     }
 
+    /// Writes an NbtValue to the writer.
+    ///
+    /// # Arguments
+    ///
+    /// * `value: NbtValue` - The NBT value to be written.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::{NbtValue, NbtWriter, Endian};
+    /// use std::io::Cursor;
+    ///
+    /// let mut value = NbtValue::new();
+    /// value.insert("test".to_string(), "test string");
+    ///
+    /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
+    /// writer.write_nbt_value(value).unwrap();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` - If the NBT value is successfully written.
+    /// * `Err(NbtError)` - If there is an error while writing the NBT value.
     pub fn write_nbt_value(&mut self, value: NbtValue) -> Result<(), NbtError> {
         match value {
             NbtValue::End => {
@@ -60,6 +124,30 @@ impl<W: Write> NbtWriter<W> {
         Ok(())
     }
 
+    /// Writes an NbtValue with a name to the writer.
+    ///
+    /// # Arguments
+    ///
+    /// * `data_name: Option<&str>` - Optional name for the root tag of the NBT data.
+    /// * `value: NbtValue` - The NBT value to be written.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use commandblock::nbt::{NbtValue, NbtWriter, Endian};
+    /// use std::io::Cursor;
+    ///
+    /// let mut value = NbtValue::new();
+    /// value.insert("test".to_string(), "test string");
+    ///
+    /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
+    /// writer.write_data(Some("root"), value).unwrap();
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` - If the NBT value is successfully written.
+    /// * `Err(NbtError)` - If there is an error while writing the NBT value.
     pub fn write_data(&mut self, data_name: Option<&str>, value: NbtValue) -> Result<(), NbtError> {
         match self.endian {
             Endian::Big => {
@@ -203,6 +291,35 @@ impl<W: Write> NbtWriter<W> {
     }
 }
 
+/// Writes an NBT file to the requested path using the given compression and endian style.
+/// If the file already exists, it will overwrite the existing data.
+///
+/// # Arguments
+///
+/// * `data_name: Option<&str>` - Optional name for the root tag of the NBT data.
+/// * `value: NbtValue` - The NBT value to write.
+/// * `path: PathBuf` - The path to the file to write to.
+/// * `compression: Compression` - The compression method to use.
+/// * `endian: Endian` - The byte order to use.
+///
+/// # Example
+///
+/// ```
+/// use commandblock::nbt::{NbtValue, write_to_file, Compression, Endian};
+/// use std::path::PathBuf;
+///
+/// let mut value = NbtValue::new();
+/// value.insert("test".to_string(), "test string");
+///
+/// let path = PathBuf::from("./tests/data/test.dat");
+///
+/// write_to_file(None, value, path, Compression::Uncompressed, Endian::Little).unwrap();
+/// ```
+///
+/// # Returns
+///
+/// * `Ok(())` - If the NBT value is successfully written to the file.
+/// * `Err(NbtError)` - If there is an error while writing the NBT value to the file.
 pub fn write_to_file(
     data_name: Option<&str>,
     value: NbtValue,
@@ -226,6 +343,62 @@ pub fn write_to_file(
             let mut encoder = flate2::write::ZlibEncoder::new(file, flate2::Compression::default());
             let mut writer = NbtWriter::new(&mut encoder, endian);
             writer.write_data(data_name, value)?;
+        }
+    }
+
+    Ok(())
+}
+
+/// Writes an NBT data to the given writer using the given compression and endian style.
+///
+/// # Arguments
+///
+/// * `data_name: Option<&str>` - Optional name for the root tag of the NBT data.
+/// * `value: NbtValue` - The NBT value to write.
+/// * `writer: W` - The writer to write to.
+/// * `compression: Compression` - The compression method to use.
+/// * `endian: Endian` - The byte order to use.
+///
+/// # Example
+///
+/// ```
+/// use commandblock::nbt::{NbtValue, write_to_writer, Compression, Endian};
+/// use std::io::Cursor;
+///
+/// let mut value = NbtValue::new();
+/// value.insert("test".to_string(), "test string");
+///
+/// let mut writer = Cursor::new(Vec::new());
+///
+/// write_to_writer(None, value, &mut writer, Compression::Uncompressed, Endian::Little).unwrap();
+/// ```
+///
+/// # Returns
+///
+/// * `Ok(())` - If the NBT value is successfully written to the writer.
+/// * `Err(NbtError)` - If there is an error while writing the NBT value to the writer.
+pub fn write_to_writer<W: Write>(
+    data_name: Option<&str>,
+    value: NbtValue,
+    writer: &mut W,
+    compression: Compression,
+    endian: Endian,
+) -> Result<(), NbtError> {
+    match compression {
+        Compression::Uncompressed => {
+            let mut nbt_writer = NbtWriter::new(writer, endian);
+            nbt_writer.write_data(data_name, value)?;
+        }
+        Compression::Gzip => {
+            let mut encoder = flate2::write::GzEncoder::new(writer, flate2::Compression::default());
+            let mut nbt_writer = NbtWriter::new(&mut encoder, endian);
+            nbt_writer.write_data(data_name, value)?;
+        }
+        Compression::Zlib => {
+            let mut encoder =
+                flate2::write::ZlibEncoder::new(writer, flate2::Compression::default());
+            let mut nbt_writer = NbtWriter::new(&mut encoder, endian);
+            nbt_writer.write_data(data_name, value)?;
         }
     }
 
