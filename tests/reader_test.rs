@@ -268,12 +268,14 @@ fn test_read_from_dat_file() {
         java_data_path,
         Compression::Gzip,
         commandblock::nbt::Endian::Big,
+        false,
     );
 
     let bedrock_result = read_from_file(
         bedrock_data_path,
         Compression::Uncompressed,
         commandblock::nbt::Endian::Little,
+        true,
     );
 
     match java_result {

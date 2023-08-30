@@ -1,6 +1,6 @@
 [package]
 name = "commandblock"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Jake 'PIXL' Evans", "Valink Solutions"]
 edition = "2021"
 
@@ -15,6 +15,7 @@ categories = ["data-structures", "parsing", "utilities"]
 
 [features]
 serde = ["dep:serde"]
+# bedrock_db = ["dep:leveldb"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,6 +23,12 @@ serde = ["dep:serde"]
 byteorder = "1.4.3"
 flate2 = "1.0.26"
 serde = { version = "1.0", optional = true }
+
+# leveldb = { version = "0.8.6", optional = true }
+leveldb = { version = "0.8.6" }
+db-key = "0.0.5"
+rusty-leveldb = "2.0.0"
+miniz_oxide = "0.7.1"
 
 [dev-dependencies]
 flate2 = "1.0.26"

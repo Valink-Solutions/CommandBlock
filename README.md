@@ -17,6 +17,7 @@ The primary aim of CommandBlock is to provide a versatile Rust-based solution fo
     - [x] NBT to Serde compatible structures
     - [x] Manipulate NBT data structures
     - [x] Write NBT data structures
+    - [] Serialize from struct into NBT data structures
 - Anvil Data Handling
     - [ ] Parse Anvil data structures
     - [ ] Interpret Anvil data structures
@@ -27,6 +28,12 @@ The primary aim of CommandBlock is to provide a versatile Rust-based solution fo
     - [ ] Interpret Minecraft region files
     - [ ] Manipulate Minecraft region files
     - [ ] Write Minecraft region files
+- Bedrock DB Parsing
+    - [ ] Parse Bedrock's LevelDB
+    - [ ] Interpret Bedrock's LevelDB data structures
+    - [ ] Manipulate Bedrock's LevelDB data structures
+    - [ ] Write to Bedrock's LevelDB
+
 
 ## Usage
 
@@ -38,7 +45,7 @@ To install CommandBlock, add the following to your `Cargo.toml` file:
 
 ```toml 
 [dependencies]
-commandblock = { version = "0.4.1", features = ["serde"] }
+commandblock = { version = "0.5.0", features = ["serde"] }
 ```
 
 ### Examples

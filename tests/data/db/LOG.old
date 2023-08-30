@@ -1,0 +1,4 @@
+Recovered manifest with next_file=8 manifest_num=7 log_num=6 prev_log_num=0 last_seq=844
+reusing manifest "tests/data/db/MANIFEST-000004"
+Recovering log file "/Volumes/extrassd/Projects/Valink/ChunkVault/systems/command_block/tests/data/db/000006.log"
+reusing log file "/Volumes/extrassd/Projects/Valink/ChunkVault/systems/command_block/tests/data/db/000006.log"

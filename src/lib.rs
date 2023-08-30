@@ -10,7 +10,7 @@
 ///
 /// // Read NBT data from a file
 /// let path = PathBuf::from("./tests/data/bedrock_level.dat");
-/// let (name, mut value) = read_from_file(path, Compression::Uncompressed, Endian::Little).unwrap();
+/// let (name, mut value) = read_from_file(path, Compression::Uncompressed, Endian::Little, true).unwrap();
 ///
 /// // Manipulate the NBT data which automatically converts to NbtValue's
 /// value.insert("test".to_string(), "Hello, world!");
@@ -22,6 +22,9 @@
 ///
 /// // Write the manipulated NBT data to a new file
 /// let path = PathBuf::from("./tests/data/test.dat");
-/// write_to_file(Some(&name), value, path, Compression::Uncompressed, Endian::Little).unwrap();
+/// write_to_file(Some(&name), value, path, Compression::Uncompressed, Endian::Little, true).unwrap();
 /// ```
 pub mod nbt;
+
+// #[cfg(feature = "bedrock_db")]
+pub mod db;

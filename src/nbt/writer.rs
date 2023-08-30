@@ -24,7 +24,7 @@ use crate::nbt::types::{Compression, Endian, NbtError, NbtValue};
 /// value.insert("test".to_string(), "test string");
 ///
 /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
-/// writer.write_data(Some("root"), value).unwrap();
+/// writer.write_data(Some("root"), value, false).unwrap();
 /// ```
 pub struct NbtWriter<W: Write> {
     writer: W,
@@ -141,14 +141,19 @@ impl<W: Write> NbtWriter<W> {
     /// value.insert("test".to_string(), "test string");
     ///
     /// let mut writer = NbtWriter::new(Cursor::new(Vec::new()), Endian::Little);
-    /// writer.write_data(Some("root"), value).unwrap();
+    /// writer.write_data(Some("root"), value, false).unwrap();
     /// ```
     ///
     /// # Returns
     ///
     /// * `Ok(())` - If the NBT value is successfully written.
     /// * `Err(NbtError)` - If there is an error while writing the NBT value.
-    pub fn write_data(&mut self, data_name: Option<&str>, value: NbtValue) -> Result<(), NbtError> {
+    pub fn write_data(
+        &mut self,
+        data_name: Option<&str>,
+        value: NbtValue,
+        dump_header: bool,
+    ) -> Result<(), NbtError> {
         match self.endian {
             Endian::Big => {
                 self.write_byte(0x0A)?;
@@ -156,8 +161,11 @@ impl<W: Write> NbtWriter<W> {
                 self.write_nbt_value(value)?;
             }
             Endian::Little => {
-                self.write_int(3)?;
-                self.write_int(value.len() as i32)?;
+                if dump_header {
+                    self.write_int(3)?;
+                    self.write_int(value.len() as i32)?;
+                }
+
                 self.write_byte(0x0A)?;
                 self.write_string(data_name.unwrap_or("").to_string())?;
                 self.write_nbt_value(value)?;
@@ -313,7 +321,7 @@ impl<W: Write> NbtWriter<W> {
 ///
 /// let path = PathBuf::from("./tests/data/test.dat");
 ///
-/// write_to_file(None, value, path, Compression::Uncompressed, Endian::Little).unwrap();
+/// write_to_file(None, value, path, Compression::Uncompressed, Endian::Little, true).unwrap();
 /// ```
 ///
 /// # Returns
@@ -326,23 +334,24 @@ pub fn write_to_file(
     path: PathBuf,
     compression: Compression,
     endian: Endian,
+    dump_header: bool,
 ) -> Result<(), NbtError> {
     let file = std::fs::File::create(path)?;
 
     match compression {
         Compression::Uncompressed => {
             let mut writer = NbtWriter::new(file, endian);
-            writer.write_data(data_name, value)?;
+            writer.write_data(data_name, value, dump_header)?;
         }
         Compression::Gzip => {
             let mut encoder = flate2::write::GzEncoder::new(file, flate2::Compression::default());
             let mut writer = NbtWriter::new(&mut encoder, endian);
-            writer.write_data(data_name, value)?;
+            writer.write_data(data_name, value, dump_header)?;
         }
         Compression::Zlib => {
             let mut encoder = flate2::write::ZlibEncoder::new(file, flate2::Compression::default());
             let mut writer = NbtWriter::new(&mut encoder, endian);
-            writer.write_data(data_name, value)?;
+            writer.write_data(data_name, value, dump_header)?;
         }
     }
 
@@ -370,7 +379,7 @@ pub fn write_to_file(
 ///
 /// let mut writer = Cursor::new(Vec::new());
 ///
-/// write_to_writer(None, value, &mut writer, Compression::Uncompressed, Endian::Little).unwrap();
+/// write_to_writer(None, value, &mut writer, Compression::Uncompressed, Endian::Little, true).unwrap();
 /// ```
 ///
 /// # Returns
@@ -383,22 +392,23 @@ pub fn write_to_writer<W: Write>(
     writer: &mut W,
     compression: Compression,
     endian: Endian,
+    dump_header: bool,
 ) -> Result<(), NbtError> {
     match compression {
         Compression::Uncompressed => {
             let mut nbt_writer = NbtWriter::new(writer, endian);
-            nbt_writer.write_data(data_name, value)?;
+            nbt_writer.write_data(data_name, value, dump_header)?;
         }
         Compression::Gzip => {
             let mut encoder = flate2::write::GzEncoder::new(writer, flate2::Compression::default());
             let mut nbt_writer = NbtWriter::new(&mut encoder, endian);
-            nbt_writer.write_data(data_name, value)?;
+            nbt_writer.write_data(data_name, value, dump_header)?;
         }
         Compression::Zlib => {
             let mut encoder =
                 flate2::write::ZlibEncoder::new(writer, flate2::Compression::default());
             let mut nbt_writer = NbtWriter::new(&mut encoder, endian);
-            nbt_writer.write_data(data_name, value)?;
+            nbt_writer.write_data(data_name, value, dump_header)?;
         }
     }
 

@@ -69,6 +69,7 @@ fn test_reading_and_manipulating_nbtvalue() {
         java_data_path,
         Compression::Gzip,
         commandblock::nbt::Endian::Big,
+        false,
     ) {
         Ok((_, mut java_result)) => {
             java_result.insert("LevelName".to_string(), "Java Data Test (modified)");
@@ -91,6 +92,7 @@ fn test_reading_and_manipulating_nbtvalue() {
         bedrock_data_path,
         Compression::Uncompressed,
         commandblock::nbt::Endian::Little,
+        true,
     ) {
         Ok((_, mut bedrock_result)) => {
             bedrock_result.insert("LevelName".to_string(), "Bedrock Data Test (modified)");

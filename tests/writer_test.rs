@@ -8,6 +8,7 @@ fn test_writing_new_uncompressed_data() {
         PathBuf::from("tests/data/java_level.dat"),
         Compression::Gzip,
         Endian::Big,
+        false,
     )
     .unwrap();
 
@@ -19,11 +20,12 @@ fn test_writing_new_uncompressed_data() {
         file_path.clone(),
         Compression::Gzip,
         Endian::Big,
+        false,
     )
     .unwrap();
 
     let (_, read_value) =
-        read_from_file(file_path.clone(), Compression::Gzip, Endian::Big).unwrap();
+        read_from_file(file_path.clone(), Compression::Gzip, Endian::Big, false).unwrap();
 
     assert_eq!(value, read_value);
 

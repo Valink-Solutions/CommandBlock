@@ -154,17 +154,17 @@ impl<R: Read> NbtReader<R> {
     /// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
     /// let mut reader = NbtReader::new(file, Endian::Little);
     ///
-    /// let (name, value) = reader.parse_data().unwrap();
+    /// let (name, value) = reader.parse_data(true).unwrap();
     /// ```
     ///
     /// # Returns
     ///
     /// * `Ok((String, NbtValue))` - Returns a tuple containing the root tag name and the parsed NBT value on success.
     /// * `Err(NbtError)` - Returns an NbtError on failure.
-    pub fn parse_data(&mut self) -> Result<(String, NbtValue), NbtError> {
-        match self.endian {
-            Endian::Big => {}
-            Endian::Little => {
+    pub fn parse_data(&mut self, dump_header: bool) -> Result<(String, NbtValue), NbtError> {
+        match dump_header {
+            false => {}
+            true => {
                 let _file_type = self.reader.read_i32::<LittleEndian>()?;
                 let _file_length = self.reader.read_i32::<LittleEndian>()?;
             }
@@ -286,7 +286,7 @@ impl<R: Read> NbtReader<R> {
 ///
 /// let path = PathBuf::from("./tests/data/bedrock_level.dat");
 ///
-/// let value = read_from_file(path, Compression::Uncompressed, Endian::Little).unwrap();
+/// let value = read_from_file(path, Compression::Uncompressed, Endian::Little, true).unwrap();
 /// ```
 ///
 /// # Returns
@@ -297,23 +297,24 @@ pub fn read_from_file(
     path: PathBuf,
     compression: Compression,
     endian_style: Endian,
+    dump_header: bool,
 ) -> Result<(String, NbtValue), NbtError> {
-    let mut file = File::open(path)?;
+    let mut file = File::open(path.clone())?;
 
     match compression {
         Compression::Uncompressed => {
             let mut parser = NbtReader::new(file, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
         Compression::Gzip => {
             let mut decoder = GzDecoder::new(&mut file);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
         Compression::Zlib => {
             let mut decoder = ZlibDecoder::new(&mut file);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
     }
 }
@@ -334,7 +335,7 @@ pub fn read_from_file(
 ///
 /// let file = File::open("./tests/data/bedrock_level.dat").unwrap();
 ///
-/// let value = read_from_reader(file, Compression::Uncompressed, Endian::Little).unwrap();
+/// let value = read_from_reader(file, Compression::Uncompressed, Endian::Little, true).unwrap();
 /// ```
 ///
 /// # Returns
@@ -345,21 +346,22 @@ pub fn read_from_reader<R: Read>(
     mut reader: R,
     compression: Compression,
     endian_style: Endian,
+    dump_header: bool,
 ) -> Result<(String, NbtValue), NbtError> {
     match compression {
         Compression::Uncompressed => {
             let mut parser = NbtReader::new(reader, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
         Compression::Gzip => {
             let mut decoder = GzDecoder::new(&mut reader);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
         Compression::Zlib => {
             let mut decoder = ZlibDecoder::new(&mut reader);
             let mut parser = NbtReader::new(&mut decoder, endian_style);
-            Ok(parser.parse_data()?)
+            Ok(parser.parse_data(dump_header)?)
         }
     }
 }
