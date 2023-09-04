@@ -135,7 +135,7 @@ impl DbReader {
                     }
                 };
 
-                parent.insert("".to_string(), value);
+                parent.insert(String::from_utf8_lossy(key.as_slice()).to_string(), value);
             }
         }
 
