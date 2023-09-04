@@ -78,9 +78,9 @@ impl DbReader {
 
     pub fn get(&mut self, key: &[u8]) -> Option<NbtValue> {
         if is_local_player_key(key) {
-            self.parse_local_player(key)
+            self.parse_player(key)
         } else if is_player_key(key) {
-            self.parse_local_player(key)
+            self.parse_player(key)
         } else {
             None
         }
@@ -93,23 +93,23 @@ impl DbReader {
         }
     }
 
-    fn parse_local_player(&mut self, key: &[u8]) -> Option<NbtValue> {
+    fn parse_player(&mut self, key: &[u8]) -> Option<NbtValue> {
         match self.db.get(key) {
-            Some(data) => {
-                let value = match read_from_reader(
-                    data.as_slice(),
+            Some(value) => {
+                let data = match read_from_reader(
+                    value.as_slice(),
                     Compression::Uncompressed,
                     Endian::Little,
                     false,
                 ) {
-                    Ok((_, value)) => value,
+                    Ok((_, data)) => data,
                     Err(e) => {
                         println!("Error: {:?}", e);
                         return None;
                     }
                 };
 
-                Some(value)
+                Some(data)
             }
             None => None,
         }
@@ -122,7 +122,7 @@ impl DbReader {
 
         while let Some((key, value)) = iter.next() {
             if is_player_key(key.as_slice()) {
-                let value = match read_from_reader(
+                let data = match read_from_reader(
                     value.as_slice(),
                     Compression::Uncompressed,
                     Endian::Little,
@@ -135,7 +135,7 @@ impl DbReader {
                     }
                 };
 
-                parent.insert(String::from_utf8_lossy(key.as_slice()).to_string(), value);
+                parent.insert(String::from_utf8_lossy(key.as_slice()).to_string(), data);
             }
         }
 

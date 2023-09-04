@@ -10,9 +10,6 @@ fn test_player_data() {
     let local_player_data = db_reader.get(key);
     let remote_player_data = db_reader.parse_remote_players();
 
-    println!("Player data: {:?}", remote_player_data);
     assert!(remote_player_data.is_some(), "Remote player data should exist");
-
-    println!("Player data: {:?}", local_player_data);
     assert!(local_player_data.is_some(), "Local player data should exist");
 }
