@@ -66,7 +66,7 @@ impl DbReader {
 
         let mut compressor_list = CompressorList::new();
         compressor_list.set_with_id(0, RawZlibCompressor::new(compression_level));
-        compressor_list.set_with_id(1, ZlibCompressor::new(compression_level));
+        compressor_list.set_with_id(4, ZlibCompressor::new(compression_level));
         options.compressor_list = Rc::new(compressor_list);
 
         options.filter_policy = Rc::new(Box::new(BloomPolicy::new(10)));
@@ -118,7 +118,13 @@ impl DbReader {
     pub fn parse_remote_players(&mut self) -> Option<NbtValue> {
         let mut parent = NbtValue::new();
 
-        let mut iter = self.db.new_iter().unwrap();
+        let mut iter = match self.db.new_iter() {
+            Ok(iter) => iter,
+            Err(e) => {
+                println!("Error: {:?}", e);
+                return None;
+            }
+        };
 
         while let Some((key, value)) = iter.next() {
             if is_player_key(key.as_slice()) {
